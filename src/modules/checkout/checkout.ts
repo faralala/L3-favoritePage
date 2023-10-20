@@ -8,6 +8,17 @@ import { ProductData } from 'types';
 class Checkout extends Component {
   products!: ProductData[];
 
+  async sendEvent(type: string, payload: any) {
+    fetch('/api/sendEvent', {
+      method: 'POST',
+      body: JSON.stringify({
+        type,
+        payload,
+        timestamp: Date.now(),
+      }),
+    });
+  }
+
   async render() {
     this.products = await cartService.get();
 
@@ -29,7 +40,15 @@ class Checkout extends Component {
   }
 
   private async _makeOrder() {
+    const orderProducts = this.products.map(product => product.id);
+    const totalPrice = formatPrice(this.products.reduce((acc, product) => (acc += product.salePriceU), 0));
+    const orderId = Date.now();
     await cartService.clear();
+    this.sendEvent('purchase', {
+      orderId,
+      totalPrice,
+      productIds: orderProducts,
+    });
     fetch('/api/makeOrder', {
       method: 'POST',
       body: JSON.stringify(this.products)

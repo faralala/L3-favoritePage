@@ -8,9 +8,21 @@ class CartService {
     this._updCounters();
   }
 
+  async sendEvent(type: string, payload: any) {
+    fetch('/api/sendEvent', {
+      method: 'POST',
+      body: JSON.stringify({
+        type,
+        payload,
+        timestamp: Date.now(),
+      }),
+    });
+  }
+
   async addProduct(product: ProductData) {
     const products = await this.get();
     await this.set([...products, product]);
+    this.sendEvent('addToCard', product);
   }
 
   async removeProduct(product: ProductData) {
