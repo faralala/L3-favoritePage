@@ -4,13 +4,22 @@ import { genUUID } from '../utils/helpers';
 const ID_DB = '__wb-userId';
 
 class UserService {
+  private userId: string | null = null;
+
   async init() {
-    const id = await this.getId();
-    console.warn('UserID: ', id);
+    this.userId = await this.getId();
+    console.warn('UserID: ', this.userId);
+  }
+
+  async getUserId(): Promise<string> {
+    if (!this.userId) {
+      this.userId = await this.getId();
+    }
+    return this.userId;
   }
 
   async getId(): Promise<string> {
-    let id = await localforage.getItem(ID_DB) as string;
+    let id = (await localforage.getItem(ID_DB)) as string;
 
     if (!id) id = await this._setId();
 
