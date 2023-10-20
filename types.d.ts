@@ -56,4 +56,5 @@ export type ProductData = {
     log?: any;
     src: string;
     description: string;
+    secretKey: string;
 }

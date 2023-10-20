@@ -21,6 +21,16 @@ export default class Router {
     window.addEventListener('load', this.route.bind(this));
     window.addEventListener('hashchange', this.route.bind(this));
   }
+  async sendEvent(type: string, payload: any) {
+    fetch('/api/sendEvent', {
+      method: 'POST',
+      body: JSON.stringify({
+        type,
+        payload,
+        timestamp: Date.now(),
+      }),
+    });
+  }
 
   route(e: any) {
     e.preventDefault();
@@ -30,5 +40,7 @@ export default class Router {
 
     component.attach(this.$appRoot);
     component.render();
+
+    this.sendEvent('route', { url: window.location.href });
   }
 }

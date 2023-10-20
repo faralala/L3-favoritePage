@@ -16,6 +16,17 @@ class ProductDetail extends Component {
     this.more.attach(this.view.more);
   }
 
+  async sendEvent(type: string, payload: any) {
+    fetch('/api/sendEvent', {
+      method: 'POST',
+      body: JSON.stringify({
+        type,
+        payload,
+        timestamp: Date.now(),
+      }),
+    });
+  }
+
   async render() {
     const urlParams = new URLSearchParams(window.location.search);
     const productId = Number(urlParams.get('id'));
@@ -25,7 +36,7 @@ class ProductDetail extends Component {
 
     if (!this.product) return;
 
-    const { id, src, name, description, salePriceU } = this.product;
+    const { id, src, name, description, salePriceU, secretKey, log } = this.product;
 
     this.view.photo.setAttribute('src', src);
     this.view.title.innerText = name;
@@ -36,6 +47,12 @@ class ProductDetail extends Component {
     const isInCart = await cartService.isInCart(this.product);
 
     if (isInCart) this._setInCart();
+
+    if (log && typeof log === 'object' && Object.keys(log).length > 0) {
+      this.sendEvent('viewCardPromo', { ...this.product, secretKey });
+    } else {
+      this.sendEvent('viewCard', { ...this.product, secretKey });
+    }
 
     fetch(`/api/getProductSecretKey?id=${id}`)
       .then((res) => res.json())
